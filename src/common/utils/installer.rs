@@ -3,7 +3,8 @@ use std::{io, fs};
 
 pub enum InstallType {
     Command,
-    Config
+    Config,
+    Root
 }
 
 pub fn get_install_dir(install_type: InstallType) -> Result<PathBuf, String> {
@@ -12,7 +13,8 @@ pub fn get_install_dir(install_type: InstallType) -> Result<PathBuf, String> {
 
     let subfolder = match install_type {
         InstallType::Command => "bin",
-        InstallType::Config => "configs"
+        InstallType::Config => "configs",
+        InstallType::Root => ""
     };
 
     Ok(home_dir.join(super::super::INSTALL_FOLDER).join(subfolder))

@@ -1,9 +1,18 @@
 #[cfg(target_os = "windows")]
 mod windows;
 
-pub fn configure() -> Result<(), String> {
+mod common;
+
+pub enum ConfigMode {
+    INSTALL,
+    UNINSTALL
+}
+
+pub fn configure(mode: &ConfigMode) -> Result<(), String> {
+    common::configure_folder(&mode).ok_or(format!("Failed to configure folder"))?;
+
     #[cfg(target_os = "windows")]
-    windows::configure().ok_or(format!("Failed to configure environment"))?;
+    windows::configure(&mode).ok_or(format!("Failed to configure environment"))?;
 
     #[cfg(not(target_os = "windows"))]
     #[cfg(not(target_os = "linux"))]

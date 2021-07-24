@@ -10,7 +10,7 @@ mod macos;
 pub mod common;
 
 fn main() {
-    if let Err(err) = common::utils::configure::configure() {
+    if let Err(err) = common::utils::configure::configure(&common::utils::configure::ConfigMode::INSTALL) {
         eprintln!("[ERROR] {}", err);
         return;
     }
