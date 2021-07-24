@@ -1,0 +1,55 @@
+use crate::common;
+use std::{fs::{
+        File,
+        create_dir_all
+    }, io, path::{self, PathBuf}};
+
+pub fn extract_file(path: &PathBuf, outdir: &str) -> Option<()> {
+    let file = File::open(&path).unwrap();
+    let mut archive = match zip::ZipArchive::new(file) {
+        Ok(archive) => archive,
+        Err(err) => {
+            println!("[ERROR][EXTRACTOR] {}", err);
+            return None
+        }
+    };
+
+    let path = path::Path::new(common::TEMP_FOLDER).join(outdir);
+
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i).ok()?;
+        let file_path = file.enclosed_name()?;
+        let output_path = path.join(file_path);
+
+        if (&*file.name()).ends_with('/') {
+            println!("File {} extracted to \"{}\"", i, output_path.display());
+            create_dir_all(&output_path).unwrap();
+        } else {
+            println!(
+                "File {} extracted to \"{}\" ({} bytes)",
+                i,
+                output_path.display(),
+                file.size()
+            );
+            if let Some(p) = output_path.parent() {
+                if !p.exists() {
+                    create_dir_all(&p).unwrap();
+                }
+            }
+            let mut outfile = File::create(&output_path).unwrap();
+            io::copy(&mut file, &mut outfile).unwrap();
+        }
+
+        // Get and Set permissions
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+
+            if let Some(mode) = file.unix_mode() {
+                fs::set_permissions(&outpath, fs::Permissions::from_mode(mode)).unwrap();
+            }
+        }
+    }
+
+    Some(())
+}
