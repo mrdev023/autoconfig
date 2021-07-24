@@ -2,11 +2,12 @@ mod git;
 
 use crate::common::utils::downloader;
 use crate::common::utils::extractor;
+use crate::common::utils::installer;
 
 // use std::process::Command;
 
 pub fn install() -> Result<(), String> {
-    println!("Install FVM");
+    println!("Installing FVM");
 
     let url = git::get_file_url()?;
 
@@ -18,15 +19,9 @@ pub fn install() -> Result<(), String> {
 
     extractor::extract_file(&file, "fvm")?;
 
-    println!("{}", url);
+    installer::install("fvm/fvm", installer::InstallType::Command).ok_or(format!("Failed to install"))?;
 
-    // let output = Command::new("winget")
-    //                     .args(&[""])
-    //                     .output()
-    //                     .map_err(|_| format!("Permision refused ! Please run as administrator."))?;
-
-    
-    // println!("{}", std::str::from_utf8(&output.stdout).map_err(|_| format!("Internal error"))?);
+    println!("FVM Installed");
 
     Ok(())
 }

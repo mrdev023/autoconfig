@@ -9,6 +9,9 @@ pub struct Asset {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GitResponse {
+    pub tag_name: String,
+    pub prerelease: bool,
+    pub draft: bool,
     pub assets: Vec<Asset>
 }
 
