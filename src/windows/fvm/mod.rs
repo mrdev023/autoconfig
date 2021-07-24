@@ -16,8 +16,7 @@ pub fn install() -> Result<(), String> {
     let file = downloader::download_file(&url, &filename)
                     .ok_or(format!("Failed to download file"))?;
 
-    extractor::extract_file(&file, "fvm")
-                .ok_or(format!("Failed to extract file"))?;
+    extractor::extract_file(&file, "fvm")?;
 
     println!("{}", url);
 
