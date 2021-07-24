@@ -10,6 +10,11 @@ mod macos;
 pub mod common;
 
 fn main() {
+    if let Err(err) = common::utils::configure::configure() {
+        eprintln!("[ERROR] {}", err);
+        return;
+    }
+
     #[cfg(target_os = "windows")]
     windows::start();
 

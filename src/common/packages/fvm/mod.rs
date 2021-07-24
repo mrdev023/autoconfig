@@ -4,8 +4,6 @@ use crate::common::utils::downloader;
 use crate::common::utils::extractor;
 use crate::common::utils::installer;
 
-// use std::process::Command;
-
 pub fn install() -> Result<(), String> {
     println!("Installing FVM");
 

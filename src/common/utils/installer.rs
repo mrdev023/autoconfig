@@ -6,11 +6,16 @@ pub enum InstallType {
     Config
 }
 
-pub fn get_install_dir() -> Result<PathBuf, String> {
+pub fn get_install_dir(install_type: InstallType) -> Result<PathBuf, String> {
     let home_dir = dirs::home_dir()
                             .ok_or(format!("Failed to get home_directory"))?;
 
-    Ok(home_dir.join(super::super::INSTALL_FOLDER))
+    let subfolder = match install_type {
+        InstallType::Command => "bin",
+        InstallType::Config => "configs"
+    };
+
+    Ok(home_dir.join(super::super::INSTALL_FOLDER).join(subfolder))
 }
 
 fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> {
@@ -30,12 +35,7 @@ fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> 
 pub fn install(source_path: &str, install_type: InstallType) -> Option <()> {
     let source_folder = std::path::Path::new(super::super::TEMP_FOLDER).join(source_path);
 
-    let subfolder = match install_type {
-        InstallType::Command => "bin",
-        InstallType::Config => "configs"
-    };
-
-    let install_folder = get_install_dir().ok()?.join(subfolder);
+    let install_folder = get_install_dir(install_type).ok()?;
     copy_dir_all(source_folder, install_folder).ok()?;
     Some(())
 }
