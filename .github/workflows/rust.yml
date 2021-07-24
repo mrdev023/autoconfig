@@ -10,20 +10,44 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  test:
+  linux_job:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Run tests
-      run: cargo test --verbose
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Build linux
-      run: cargo build --release
-    - name: Build
-      uses: actions/upload-artifact@v2.2.4
+    - name: Cache build
+      uses: actions/cache@v2
       with:
-        name: "$GITHUB_HEAD_REF-linux"
+        path: ~/target
+        key: ${{ runner.os }}-build-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ hashFiles('**/Cargo.lock') }}
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - run: cargo build --release
+    - run: cargo test --release
+    - name: Upload build file
+      uses: actions/upload-artifact@v2
+      with:
+        name: linux
         path: target/release/autoconfig
+
+  windows_job:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cache build
+      uses: actions/cache@v2
+      with:
+        path: ~/target
+        key: ${{ runner.os }}-build-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ hashFiles('**/Cargo.lock') }}
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - run: cargo build --release
+    - run: cargo test --release
+    - name: Upload build file
+      uses: actions/upload-artifact@v2
+      with:
+        name: windows
+        path: target/release/autoconfig.exe
