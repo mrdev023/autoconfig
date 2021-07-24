@@ -39,16 +39,6 @@ pub fn extract_file(path: &PathBuf, outdir: &str) -> Option<()> {
             let mut outfile = File::create(&output_path).unwrap();
             io::copy(&mut file, &mut outfile).unwrap();
         }
-
-        // Get and Set permissions
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-
-            if let Some(mode) = file.unix_mode() {
-                fs::set_permissions(&outpath, fs::Permissions::from_mode(mode)).unwrap();
-            }
-        }
     }
 
     Some(())
