@@ -25,7 +25,7 @@ pub fn start() {
     let opt = Opt::from_args();
     for tool in &opt.tools {
         let result = match tool {
-            Tool::Fvm => super::common::fvm::install()
+            Tool::Fvm => super::common::packages::fvm::install()
         };
 
         if let Err(err) = result {
