@@ -1,19 +1,40 @@
+use clap::{Clap};
+
 use crate::installer::{
     Installer,
     utils::{
-        file_utils::InstallType,
         configure::{
             configure,
             ConfigMode
         }
-    },
-    git::{
-        GitConfig,
-        GitFileIdentifier
     }
 };
 
 mod installer;
+mod packages;
+
+
+#[derive(Clap, Debug)]
+#[clap(name = "autoconfig")]
+struct CommandArgs {
+    #[clap(short, long)]
+    install: Option<String>,
+}
+
+fn process() -> Result<(), String> {
+    let command_args = CommandArgs::parse();
+
+    match command_args.install {
+        Some(package) => match package.as_str() {
+            "fvm" => installer::process(Installer::GIT(packages::fvm::get_fvm_config()), ConfigMode::INSTALL),
+            package => Err(format!("Package {} not found", package))
+        },
+        None => {
+            println!("[INFO] Package list : [fvm]");
+            Ok(())
+        }
+    }
+}
 
 fn main() {
     if let Err(err) = configure(&ConfigMode::INSTALL) {
@@ -21,46 +42,7 @@ fn main() {
         return;
     }
 
-    let fvm_config : GitConfig = GitConfig {
-        package: String::from("leoafarias/fvm"),
-        version: String::from("latest"),
-        git_identifiers: vec![
-            GitFileIdentifier {
-                os_name: String::from("windows"),
-                arch: String::from("x86_64"),
-                os_identifier: String::from("windows"),
-                arch_identifier: String::from("x64")
-            },
-            GitFileIdentifier {
-                os_name: String::from("windows"),
-                arch: String::from("x86"),
-                os_identifier: String::from("windows"),
-                arch_identifier: String::from("ia32")
-            },
-            GitFileIdentifier {
-                os_name: String::from("macos"),
-                arch: String::from("x86_64"),
-                os_identifier: String::from("macos"),
-                arch_identifier: String::from("x64")
-            },
-            GitFileIdentifier {
-                os_name: String::from("linux"),
-                arch: String::from("x86_64"),
-                os_identifier: String::from("linux"),
-                arch_identifier: String::from("x64")
-            },
-            GitFileIdentifier {
-                os_name: String::from("linux"),
-                arch: String::from("x86"),
-                os_identifier: String::from("linux"),
-                arch_identifier: String::from("ia32")
-            }
-        ],
-        install_type: InstallType::Command,
-        archive_subfolder: String::from("fvm")
-    };
-
-    if let Err(err) = installer::process(Installer::GIT(fvm_config), ConfigMode::INSTALL) {
+    if let Err(err) = process() {
         eprintln!("[ERROR] {}", err);
         return;
     }
