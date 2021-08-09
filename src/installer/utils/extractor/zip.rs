@@ -1,4 +1,3 @@
-use crate::common;
 use std::{fs::{
         File,
         create_dir_all
@@ -8,7 +7,7 @@ pub fn extract_file(path: &PathBuf, outdir: &str) -> Option<()> {
     let file = File::open(&path).ok()?;
     let mut archive = zip::ZipArchive::new(file).ok()?;
 
-    let path = path::Path::new(common::TEMP_FOLDER).join(outdir);
+    let path = path::Path::new(super::super::TEMP_FOLDER).join(outdir);
 
     for i in 0..archive.len() {
         let mut file = archive.by_index(i).ok()?;

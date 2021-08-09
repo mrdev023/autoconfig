@@ -36,7 +36,3 @@ pub fn get_git_release_by_version(repo: &str, version: &str) -> Option<GitRespon
 
     Some(git_response)
 }
-
-pub fn get_git_latest_release(repo: &str) -> Option<GitResponse> {
-    Some(get_git_release_by_version(repo, "latest")?)
-}

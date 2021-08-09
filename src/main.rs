@@ -1,31 +1,67 @@
-#[cfg(target_os = "windows")]
-mod windows;
+use crate::installer::{
+    Installer,
+    utils::{
+        file_utils::InstallType,
+        configure::{
+            configure,
+            ConfigMode
+        }
+    },
+    git::{
+        GitConfig,
+        GitFileIdentifier
+    }
+};
 
-#[cfg(target_os = "linux")]
-mod linux;
-
-#[cfg(target_os = "macos")]
-mod macos;
-
-pub mod common;
+mod installer;
 
 fn main() {
-    if let Err(err) = common::utils::configure::configure(&common::utils::configure::ConfigMode::INSTALL) {
+    if let Err(err) = configure(&ConfigMode::INSTALL) {
         eprintln!("[ERROR] {}", err);
         return;
     }
 
-    #[cfg(target_os = "windows")]
-    windows::start();
+    let fvm_config : GitConfig = GitConfig {
+        package: String::from("leoafarias/fvm"),
+        version: String::from("latest"),
+        git_identifiers: vec![
+            GitFileIdentifier {
+                os_name: String::from("windows"),
+                arch: String::from("x86_64"),
+                os_identifier: String::from("windows"),
+                arch_identifier: String::from("x64")
+            },
+            GitFileIdentifier {
+                os_name: String::from("windows"),
+                arch: String::from("x86"),
+                os_identifier: String::from("windows"),
+                arch_identifier: String::from("ia32")
+            },
+            GitFileIdentifier {
+                os_name: String::from("macos"),
+                arch: String::from("x86_64"),
+                os_identifier: String::from("macos"),
+                arch_identifier: String::from("x64")
+            },
+            GitFileIdentifier {
+                os_name: String::from("linux"),
+                arch: String::from("x86_64"),
+                os_identifier: String::from("linux"),
+                arch_identifier: String::from("x64")
+            },
+            GitFileIdentifier {
+                os_name: String::from("linux"),
+                arch: String::from("x86"),
+                os_identifier: String::from("linux"),
+                arch_identifier: String::from("ia32")
+            }
+        ],
+        install_type: InstallType::Command,
+        archive_subfolder: String::from("fvm")
+    };
 
-    #[cfg(target_os = "linux")]
-    linux::start();
-
-    #[cfg(target_os = "macos")]
-    macos::start();
-
-    #[cfg(not(target_os = "windows"))]
-    #[cfg(not(target_os = "linux"))]
-    #[cfg(not(target_os = "macos"))]
-    println!("[ERROR] Operating system not supported");
+    if let Err(err) = installer::process(Installer::GIT(fvm_config), ConfigMode::INSTALL) {
+        eprintln!("[ERROR] {}", err);
+        return;
+    }
 }

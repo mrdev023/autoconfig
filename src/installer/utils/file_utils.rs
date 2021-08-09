@@ -17,7 +17,7 @@ pub fn get_install_dir(install_type: InstallType) -> Result<PathBuf, String> {
         InstallType::Root => ""
     };
 
-    Ok(home_dir.join(super::super::INSTALL_FOLDER).join(subfolder))
+    Ok(home_dir.join(super::INSTALL_FOLDER).join(subfolder))
 }
 
 fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> {
@@ -35,7 +35,7 @@ fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> 
 }
 
 pub fn install(source_path: &str, install_type: InstallType) -> Option <()> {
-    let source_folder = std::path::Path::new(super::super::TEMP_FOLDER).join(source_path);
+    let source_folder = std::path::Path::new(super::TEMP_FOLDER).join(source_path);
 
     let install_folder = get_install_dir(install_type).ok()?;
     copy_dir_all(source_folder, install_folder).ok()?;
