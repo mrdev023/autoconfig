@@ -9,7 +9,7 @@ fn folder_exist(folder: &str) -> bool {
 }
 
 pub fn configure_folder(mode: &ConfigMode) -> Option<()> {
-    let binary_folder_path = file_utils::get_install_dir(file_utils::InstallType::Root).ok()?;
+    let binary_folder_path = file_utils::get_install_dir(&file_utils::InstallType::Root).ok()?;
     let binary_folder_str = binary_folder_path.to_str()?;
 
     match mode {

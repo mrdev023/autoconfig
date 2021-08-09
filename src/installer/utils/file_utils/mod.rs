@@ -1,3 +1,5 @@
+mod binary_utils;
+
 use std::path::{PathBuf, Path};
 use std::{io, fs};
 
@@ -7,7 +9,7 @@ pub enum InstallType {
     Root
 }
 
-pub fn get_install_dir(install_type: InstallType) -> Result<PathBuf, String> {
+pub fn get_install_dir(install_type: &InstallType) -> Result<PathBuf, String> {
     let home_dir = dirs::home_dir()
                             .ok_or(format!("Failed to get home_directory"))?;
 
@@ -18,6 +20,12 @@ pub fn get_install_dir(install_type: InstallType) -> Result<PathBuf, String> {
     };
 
     Ok(home_dir.join(super::INSTALL_FOLDER).join(subfolder))
+}
+
+pub fn get_packages_dir(package: &str) -> Result<PathBuf, String> {
+    let home_dir = dirs::home_dir()
+                            .ok_or(format!("Failed to get home_directory"))?;
+    Ok(home_dir.join(super::INSTALL_FOLDER).join(super::PACKAGE_FOLDER).join(package))
 }
 
 fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> {
@@ -34,10 +42,17 @@ fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> 
     Ok(())
 }
 
-pub fn install(source_path: &str, install_type: InstallType) -> Option <()> {
+pub fn install(source_path: &str, package: &str, install_type: InstallType) -> Option <()> {
     let source_folder = std::path::Path::new(super::TEMP_FOLDER).join(source_path);
+    let package_folder = get_packages_dir(package).ok()?;
 
-    let install_folder = get_install_dir(install_type).ok()?;
-    copy_dir_all(source_folder, install_folder).ok()?;
-    Some(())
+    copy_dir_all(source_folder, package_folder.clone()).ok()?;
+
+    let install_folder = get_install_dir(&install_type).ok()?;
+
+    match install_type {
+        InstallType::Command => binary_utils::create_symlink_of_binary_files(&package_folder, &install_folder).ok(),
+        InstallType::Config => todo!(),
+        InstallType::Root => todo!(),
+    }
 }
