@@ -2,6 +2,9 @@ use std::env::consts;
 use std::path::PathBuf;
 use std::fs;
 
+#[cfg(target_family = "unix")]
+use std::os::unix::fs::symlink;
+
 fn file_is_executable(path: &PathBuf) -> bool {
     if consts::FAMILY == "windows" {
         match path.extension() {
@@ -45,7 +48,7 @@ pub fn create_symlink_of_binary_files(install_package_folder: &PathBuf, binary_p
     for file in files {
         let output_path = binary_package_folder.join(file.file_name().ok_or(format!("Failed to get filename"))?);
 
-        #[cfg(target_os = "windows")]
+        #[cfg(target_family = "windows")]
         {
             let file_path = file.as_os_str().to_str().ok_or(format!("Failed to get filename str"))?;
             fs::write(output_path, format!("
@@ -53,6 +56,9 @@ pub fn create_symlink_of_binary_files(install_package_folder: &PathBuf, binary_p
             {} %*
             ", file_path)).map_err(|_| format!("Failed to create symlink"))?;
         }
+
+        #[cfg(target_family = "unix")]
+        symlink(file.as_os_str(), output_path.as_os_str()).map_err(|_| format!("Failed to create symlink"))?;
     }
 
     Ok(())
