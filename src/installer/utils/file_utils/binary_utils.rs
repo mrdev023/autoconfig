@@ -1,12 +1,15 @@
-use std::env::consts;
 use std::path::PathBuf;
-use std::fs;
+use std::fs::{self, Metadata};
 
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::symlink;
 
-fn file_is_executable(path: &PathBuf) -> bool {
-    if consts::FAMILY == "windows" {
+#[cfg(target_family = "unix")]
+use std::os::unix::fs::PermissionsExt;
+
+fn file_is_executable(path: &PathBuf, metadata: &Metadata) -> bool {
+    #[cfg(target_family = "windows")]
+    {
         match path.extension() {
             Some(ext) => {
                 let extension = match ext.to_str() {
@@ -20,8 +23,14 @@ fn file_is_executable(path: &PathBuf) -> bool {
             },
             None => false
         }
-    } else {
-        todo!()
+    }
+    #[cfg(target_family = "unix")]
+    {
+        if metadata.permissions().mode() & 0o111 != 0 {
+            true
+        } else {
+            false
+        }
     }
 }
 
@@ -32,7 +41,7 @@ fn get_binary_files(install_package_folder: &PathBuf) -> Result<Vec<PathBuf>, St
     for path_result in paths {
         let path = path_result.map_err(|_| format!("Failed to get file"))?;
         let metadata = path.metadata().map_err(|_| format!("Failed to get metadata"))?;
-        if metadata.is_file() && file_is_executable(&path.path()) {
+        if metadata.is_file() && file_is_executable(&path.path(), &metadata) {
             files.push(path.path().clone());
         }
     }
