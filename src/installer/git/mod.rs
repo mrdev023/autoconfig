@@ -1,6 +1,8 @@
+mod git;
+
 use std::env::consts;
 
-use super::utils::{configure, downloader, extractor, git, file_utils};
+use super::utils::{configure, downloader, extractor, file_utils};
 
 pub struct GitFileIdentifier {
     pub os_name: String,

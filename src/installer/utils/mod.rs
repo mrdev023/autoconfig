@@ -4,6 +4,5 @@ pub(self) static PACKAGE_FOLDER : &str = "packages";
 
 pub mod downloader;
 pub mod extractor;
-pub mod git;
 pub mod file_utils;
 pub mod configure;
